@@ -1,0 +1,84 @@
+Text Prediction Application
+========================================================
+author: Jing Yi
+date: 30 Nov 2020
+autosize: true
+font-family: 'Cambria'
+
+
+Introduction
+========================================================
+
+The objective of this project is to explore predictive text model by using backoff n-gram language modeling technique. An algorithm called 'Stupid Backoff' which similar but simpler scheme by comparing with Katz Backoff (Katx, 1987) to select next word according to frequency.
+
+The predictive text model is build in Shiny Application provides user interface for entering word and suggests next word.
+
+- Information in Github: https://github.com/JINGY1/Coursera_Capstone_Proj
+- Shiny App: https://jingy1.shinyapps.io/Capstone_Proj_Text_Prediction/
+
+
+Summary of Data
+========================================================
+
+The data used to build the model can be download here: https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip
+
+It consists of 3 different types of English text files (blog, news and twitter).
+Some basic analysis has been done in Week2 project which including building corpus and tokenization which the text has parse into n-gram model.
+
+```{r basicinfo, echo=FALSE, warning = FALSE}
+library(readr)
+library(knitr)
+blogs <- read_lines('Coursera-SwiftKey/final/en_US/en_US.blogs.txt')
+news <- read_lines('Coursera-SwiftKey/final/en_US/en_US.news.txt')
+twitter <- readLines('Coursera-SwiftKey/final/en_US/en_US.twitter.txt')
+
+Overview <- data.frame(
+  'FileName'=c("blog","news","twitter"),
+  'FileSize' = sapply(list(blogs, news, twitter), function(x){format(object.size(x),"MB")}),
+  'Nrows' = sapply(list(blogs, news, twitter), function(x){length(x)}),
+  'TotalCharacters' = sapply(list(blogs, news, twitter), function(x){sum(nchar(x))}),
+  'MaxCharacters' = sapply(list(blogs, news, twitter), function(x){max(unlist(lapply(x, function(y) nchar(y))))})
+  )
+kable(Overview,caption = "Basic Information")
+```
+
+
+The Predictive Text Model
+========================================================
+
+The 3 different text files is combined and randomly selected. Then separate into 80% training set and 20% validate set. Here is basic information of sampled data:
+```{r basicinfo_sample, echo=FALSE, warning=FALSE}
+set.seed(1724)
+combinedSource <- c(blogs, news, twitter)
+combinedsample <- sample(combinedSource, length(combinedSource) * 0.1)
+
+Overview <- data.frame(
+  'FileName'=c("combine"),
+  'FileSize' = format(object.size(combinedsample),"MB"),
+  'Nrows' = length(combinedsample),
+  'TotalCharacters' = sum(nchar(combinedsample)),
+  'MaxCharacters' = max(unlist(lapply(combinedsample, function(y) nchar(y))))
+)
+kable(Overview,caption = "Basic Information of Sample Data")
+```
+
+Then, ascii character, symbols, punctuation, numbers, separators and URL is removed from sampled data by using quanteda R package.
+
+The cleaned data is then tokenized into 3 different level of n-grams tokens. 
+
+
+Shiny Application
+========================================================
+
+The user interface is provided for entering words and choosing number of prediction words. The result will be in 3 different form:
+
+- Predicted word with frequencies (Prob)
+- Predicted sentence
+- Wordcloud
+
+***
+```{r app1, echo=FALSE, out.width = "80%", fig.align = "center"}
+library(knitr)
+library(png)
+knitr::include_graphics("./App1.png")
+```
